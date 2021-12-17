@@ -1,0 +1,210 @@
+{
+    "appid": "1b0e5665-faeb-4c8e-9fd3-8627cd90d530",
+    "name": "CSV Import",
+    "description": "Ingest CSV files into Phantom",
+    "type": "information",
+    "product_vendor": "CSV",
+    "logo": "csvimport.png",
+    "logo_dark": "csvimport_dark.png",
+    "product_name": "CSV",
+    "product_version_regex": ".*",
+    "publisher": "Splunk",
+    "license": "Copyright (c) Splunk, 2018",
+    "app_version": "1.0.0",
+    "utctime_updated": "2018-11-13T22:04:02.279194Z",
+    "package_name": "phantom_csvimport",
+    "main_module": "csvimport_connector.pyc",
+    "min_phantom_version": "4.1.94",
+    "app_wizard_version": "1.0.0",
+    "configuration": {
+        "base_url": {
+            "description": "The Base URL for REST connections",
+            "data_type": "string",
+            "required": true,
+            "value_list": [],
+            "default": "https://127.0.0.1",
+            "order": 0
+        },
+        "auth_token": {
+            "description": "Phantom user auth token",
+            "data_type": "string",
+            "required": true,
+            "value_list": [],
+            "default": "",
+            "order": 1
+        }
+    },
+    "actions": [
+        {
+            "action": "test connectivity",
+            "identifier": "test_connectivity",
+            "description": "Validate the asset configuration for connectivity using supplied configuration",
+            "verbose": "",
+            "type": "test",
+            "read_only": true,
+            "parameters": {},
+            "output": [],
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "ingest csv",
+            "identifier": "ingest_csv",
+            "description": "Read contents of a CSV and create artifact",
+            "verbose": "",
+            "type": "generic",
+            "read_only": true,
+            "parameters": {
+                "vault_id": {
+                    "description": "The vault_id for the csv",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": ["vault id"
+                    ],
+                    "value_list": [],
+                    "default": "",
+                    "order": 0
+                },
+                "container_id": {
+                    "description": "The container_id for the vault containing the csv",
+                    "data_type": "numeric",
+                    "required": true,
+                    "primary": false,
+                    "contains": [],
+                    "value_list": [],
+                    "default": "",
+                    "order": 1
+                },
+                "cef_column_headers": {
+                    "description": "Comma seperated list of the CEF columns (e.g. ip,port,type,comment)",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": false,
+                    "contains": [],
+                    "value_list": [],
+                    "default": "",
+                    "order": 2 
+                },
+                "artifact_name": {
+                    "description": "Name for the artifact (e.g. IP Artifact)",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": false,
+                    "contains": [],
+                    "value_list": [],
+                    "default": "",
+                    "order": 3
+                },
+                "artifact_label": {
+                    "description": "Label for the artifact (e.g. IP_test)",
+                    "data_type": "string",
+                    "required": false,
+                    "primary": false,
+                    "contains": [],
+                    "value_list": [],
+                    "default": "",
+                    "order": 4
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.parameter.vault_id",
+                    "data_type": "string",
+                    "contains": [],
+                    "column_name": "vault_id",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.parameter.container_id",
+                    "data_type": "numeric",
+                    "contains": [],
+                    "column_name": "container_id",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "column_name": "status",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "csv from artifacts",
+            "identifier": "create_csv",
+            "description": "Given a container_id create a csv in the vault from all the container's artifacts.",
+            "verbose": "",
+            "type": "generic",
+            "read_only": true,
+            "parameters": {
+                "container_id": {
+                    "description": "The container_id for the artifacts",
+                    "data_type": "numeric",
+                    "required": true,
+                    "primary": false,
+                    "contains": [],
+                    "value_list": [],
+                    "default": "",
+                    "order": 0 
+                },
+                "page_size": {
+                    "description": "The number of pages to retrieve.",
+                    "data_type": "numeric",
+                    "required": false,
+                    "primary": false,
+                    "contains": [],
+                    "value_list": [],
+                    "default": "1000",
+                    "order": 1 
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.parameter.container_id",
+                    "data_type": "numeric",
+                    "contains": [],
+                    "column_name": "container_id",
+                    "column_order": 1
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "column_name": "status",
+                    "column_order": 2
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        }
+    ]
+}
