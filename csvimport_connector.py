@@ -1,21 +1,22 @@
-# -----------------------------------------
-# Phantom sample App Connector python file
-# -----------------------------------------
+# File: csvimport_connector.py
+# Copyright (c) 2018-2021 Splunk Inc.
+#
+# SPLUNK CONFIDENTIAL - Use or disclosure of this material in whole or in part
+# without a valid written license from Splunk Inc. is PROHIBITED.
+
+import csv
+import json
+import sys
 
 # Phantom App imports
 import phantom.app as phantom
 import phantom.rules as phantomrules
-from phantom.base_connector import BaseConnector
-from phantom.action_result import ActionResult
-
-# Usage of the consts file is recommended
-# from csvimport_consts import *
-import json
-from phantom.vault import Vault
-import csv
-import sys
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
+from phantom.action_result import ActionResult
+from phantom.base_connector import BaseConnector
+
+from csvimport_consts import *
 
 
 class RetVal(tuple):
@@ -50,7 +51,7 @@ class CsvImportConnector(BaseConnector):
         # An html response, treat it like an error
         status_code = response.status_code
         # Handle valid responses from ipinfo.io
-        if (status_code == 200):
+        if status_code == 200:
             return RetVal(phantom.APP_SUCCESS, response.text)
 
         try:
@@ -59,13 +60,13 @@ class CsvImportConnector(BaseConnector):
             split_lines = error_text.split('\n')
             split_lines = [x.strip() for x in split_lines if x.strip()]
             error_text = '\n'.join(split_lines)
-        except:
+        except Exception:
             error_text = "Cannot parse error details"
 
         message = "Status Code: {0}. Data from server:\n{1}\n".format(status_code,
-                error_text)
+                                                                      error_text)
 
-        message = message.replace(u'{', '{{').replace(u'}', '}}')
+        message = message.replace('{', '{{').replace('}', '}}')
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
@@ -75,7 +76,8 @@ class CsvImportConnector(BaseConnector):
         try:
             resp_json = r.json()
         except Exception as e:
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Unable to parse JSON response. Error: {0}".format(str(e))), None)
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Unable to parse JSON response. Error: {0}".format(str(e))),
+                          None)
 
         # Please specify the status codes here
         if 200 <= r.status_code < 399:
@@ -83,7 +85,7 @@ class CsvImportConnector(BaseConnector):
 
         # You should process the error returned in the json
         message = "Error from server. Status Code: {0} Data from server: {1}".format(
-                r.status_code, r.text.replace(u'{', '{{').replace(u'}', '}}'))
+            r.status_code, r.text.replace('{', '{{').replace('}', '}}'))
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
@@ -114,7 +116,7 @@ class CsvImportConnector(BaseConnector):
 
         # everything else is actually an error at this point
         message = "Can't process response from server. Status Code: {0} Data from server: {1}".format(
-                r.headers, r.text.replace('{', '{{').replace('}', '}}'))
+            r.headers, r.text.replace('{', '{{').replace('}', '}}'))
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
@@ -133,15 +135,16 @@ class CsvImportConnector(BaseConnector):
         # Create a URL to connect to
         url = self._base_url + endpoint
         headers = {"ph-auth-token": self._auth_token}
-        self.save_progress("Connecting to endpoint: {}".format(url) )
+        self.save_progress("Connecting to endpoint: {}".format(url))
         try:
             r = request_func(
-                            url,
-                            headers=headers,
-                            verify=config.get('verify_server_cert', False),
-                            **kwargs)
+                url,
+                headers=headers,
+                verify=config.get('verify_server_cert', False),
+                **kwargs)
         except Exception as e:
-            return RetVal(action_result.set_status( phantom.APP_ERROR, "Error Connecting to server. Details: {0}".format(str(e))), resp_json)
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error Connecting to server. Details: {0}".format(str(e))),
+                          resp_json)
 
         return self._process_response(r, action_result)
 
@@ -159,7 +162,7 @@ class CsvImportConnector(BaseConnector):
         # make rest call
         ret_val, response = self._make_rest_call('/rest/version', action_result)
 
-        if (phantom.is_fail(ret_val)):
+        if phantom.is_fail(ret_val):
             # the call to the 3rd party device or service failed, action result should contain all the error details
             # for now the return is commented out, but after implementation, return from here
             self.save_progress("Test Connectivity Failed.")
@@ -170,70 +173,76 @@ class CsvImportConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _get_file_info_from_vault(self, action_result, vault_id, file_type=None):
-        file_info = {}
-        file_info['id'] = vault_id
+        file_info = {
+            'id': vault_id
+        }
 
         try:
-            info = Vault.get_file_info(vault_id=vault_id)[0]
+            info = phantomrules.vault_info(vault_id=vault_id)[2][0]
         except IndexError:
             return RetVal(action_result.set_status(phantom.APP_ERROR, "No file with vault ID found"), None)
         except Exception as e:
-            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error retrieving file from vault: {0}".format(str(e))), None)
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error retrieving file from vault: {0}".format(str(e))),
+                          None)
         file_info['path'] = info['path']
         file_info['name'] = info['name']
-        if file_type:
-            file_info['type'] = file_type
-        else:
+        if not file_type:
             file_type = info['name'].split('.')[-1]
-            file_info['type'] = file_type
+        file_info['type'] = file_type
 
         return RetVal(phantom.APP_SUCCESS, file_info)
 
     def _handle_create_csv(self, param):
         action_result = self.add_action_result(ActionResult(dict(param)))
-        container_id = param.get('container_id')
-        page_size = param.get('page_size')
-        if container_id is None:
-            return action_result.set_status(phantom.APP_ERROR, "A container ID must be provided")
+        ret_val, container_id = self._validate_integer(action_result, param["container_id"], 'Container ID', False)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+        ret_val, page_size = self._validate_integer(action_result, param.get('page_size', 1000), 'Page Size', False)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
 
-        ret_val, response = self._make_rest_call('/rest/artifact?_filter_container_id={0}&page_size={1}'.format(container_id, page_size), action_result)
+        ret_val, response = self._make_rest_call('/rest/artifact?_filter_container_id={0}&page_size={1}'.format(
+            container_id, page_size), action_result)
         fieldnames = set()
         for i in response['data']:
-            for key, val in i.items():
-                if isinstance(val, dict) and key != u'cef_types':
+            for key, val in list(i.items()):
+                if isinstance(val, dict) and key != 'cef_types':
                     temp = i.pop(key)
                     i.update(temp)
-            for j in i.keys():
+            for j in list(i.keys()):
                 fieldnames.add(j)
         with open('/opt/phantom/vault/tmp/csv_output.csv', 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=list(fieldnames))
             writer.writeheader()
             for row in response['data']:
                 writer.writerow(row)
-        success, message, vault_id = phantomrules.vault_add( container=container_id,
-                                                        file_location="/opt/phantom/vault/tmp/csv_output.csv",
-                                                        file_name="csv_output.csv" )
+        phantomrules.vault_add(container=container_id,
+                               file_location="/opt/phantom/vault/tmp/csv_output.csv",
+                               file_name="csv_output.csv")
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_ingest_csv(self, param):
         action_result = self.add_action_result(ActionResult(dict(param)))
-        container_id = param.get('container_id')
-        cef_names = param.get('cef_column_headers').split(',')
-        num_columns = len(cef_names)
-        artifact_name = param.get('artifact_name')
+        ret_val, container_id = self._validate_integer(action_result, param["container_id"], 'Container ID', False)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+        vault_id = param['vault_id']
+        artifact_name = param['artifact_name']
         artifact_label = param.get('artifact_label')
+        cef_names = param['cef_column_headers']
+
+        if cef_names:
+            cef_names = [x.strip() for x in cef_names.split(',')]
+            cef_names = list(filter(None, cef_names))
         if not artifact_label:
             artifact_label = "events"
-        file_info = {}
-        if container_id is None:
-            return action_result.set_status(phantom.APP_ERROR, "A container ID must be provided")
-        if container_id:
-            # Make sure container exists first, provide a better error message than waiting for save_artifacts to fail
-            ret_val, message, _ = self.get_container_info(container_id)
-            if phantom.is_fail(ret_val):
-                return action_result.set_status(phantom.APP_ERROR, "Unable to find container: {}".format(message))
+        num_columns = len(cef_names)
 
-        vault_id = param.get('vault_id')
+        # Make sure container exists first, provide a better error message than waiting for save_artifacts to fail
+        ret_val, message, _ = self.get_container_info(container_id)
+        if phantom.is_fail(ret_val):
+            return action_result.set_status(phantom.APP_ERROR, "Unable to find container: {}".format(message))
+
         # run_automation = param.get('run_automation', True)
         if vault_id:
             ret_val, file_info = self._get_file_info_from_vault(action_result, vault_id)
@@ -242,20 +251,37 @@ class CsvImportConnector(BaseConnector):
             self.debug_print("File Info", file_info)
             self.save_progress("****File Info : {0}".format(file_info))
             csv_vault_path = file_info['path']
-            csvf = open(csv_vault_path, "r")
-            reader = csv.reader(csvf)
-            for row in reader:
-                cef = {}
-                for i in range(num_columns):
-                    cef[cef_names[i]] = row[i]
-                success, message, artifact_id = phantomrules.add_artifact(
-                    container=container_id, raw_data={}, cef_data=cef, label=artifact_label,
-                    name=artifact_name, severity='high',
-                    identifier=None,
-                    artifact_type=artifact_label)
-                # self.save_progress("****JSON : {0}".format(artifact_json))
+            with open(csv_vault_path, "r") as csvf:
+                reader = csv.reader(csvf)
+                for row in reader:
+                    cef = {}
+                    for i in range(num_columns):
+                        cef[cef_names[i]] = row[i]
+                    phantomrules.add_artifact(
+                        container=container_id, raw_data={}, cef_data=cef, label=artifact_label,
+                        name=artifact_name, severity='high',
+                        identifier=None,
+                        artifact_type=artifact_label)
+                    # self.save_progress("****JSON : {0}".format(artifact_json))
 
         return action_result.set_status(phantom.APP_SUCCESS)
+
+    def _validate_integer(self, action_result, parameter, key, allow_zero=False):
+        if parameter is not None:
+            try:
+                if not float(parameter).is_integer():
+                    return action_result.set_status(phantom.APP_ERROR, CSVIMPORT_INVALID_INT.format(param=key)), None
+
+                parameter = int(parameter)
+            except Exception:
+                return action_result.set_status(phantom.APP_ERROR, CSVIMPORT_INVALID_INT.format(param=key)), None
+
+            if parameter < 0:
+                return action_result.set_status(phantom.APP_ERROR, CSVIMPORT_ERR_NEGATIVE_INT_PARAM.format(param=key)), None
+            if not allow_zero and parameter == 0:
+                return action_result.set_status(phantom.APP_ERROR, CSVIMPORT_ERR_INVALID_PARAM.format(param=key)), None
+
+        return phantom.APP_SUCCESS, parameter
 
     def handle_action(self, param):
 
@@ -309,11 +335,12 @@ class CsvImportConnector(BaseConnector):
 if __name__ == '__main__':
     # import sys
     import pudb
+
     pudb.set_trace()
 
-    if (len(sys.argv) < 2):
-        print "No test json specified as input"
-        exit(0)
+    if len(sys.argv) < 2:
+        print("No test json specified as input")
+        sys.exit(0)
 
     with open(sys.argv[1]) as f:
         in_json = f.read()
@@ -323,6 +350,6 @@ if __name__ == '__main__':
         connector = CsvImportConnector()
         connector.print_progress_message = True
         ret_val = connector._handle_action(json.dumps(in_json), None)
-        print (json.dumps(json.loads(ret_val), indent=4))
+        print(json.dumps(json.loads(ret_val), indent=4))
 
-    exit(0)
+    sys.exit(0)
