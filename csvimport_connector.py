@@ -100,14 +100,15 @@ class CsvImportConnector(BaseConnector):
         # Process each 'Content-Type' of response separately
 
         # Process a json response
-        if 'json' or 'javascript' in r.headers.get('Content-Type', ''):
+        content_type = r.headers.get('Content-Type', '')
+        if content_type == 'json' or content_type == 'javascript':
             return self._process_json_response(r, action_result)
 
         # Process an HTML response, Do this no matter what the api talks.
         # There is a high chance of a PROXY in between phantom and the rest of
         # world, in case of errors, PROXY's return HTML, this function parses
         # the error and adds it to the action_result.
-        if 'html' in r.headers.get('Content-Type', ''):
+        if content_type == 'html':
             return self._process_html_response(r, action_result)
 
         # it's not content-type that is to be parsed, handle an empty response

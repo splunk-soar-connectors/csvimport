@@ -3,9 +3,9 @@
     "name": "CSV Import",
     "description": "Ingest CSV files into Phantom",
     "type": "information",
-    "product_vendor": "CSV",
-    "logo": "csvimport.png",
-    "logo_dark": "csvimport_dark.png",
+    "product_vendor": "Splunk",
+    "logo": "logo_splunk.svg",
+    "logo_dark": "logo_splunk_dark.svg",
     "product_name": "CSV",
     "product_version_regex": ".*",
     "publisher": "Splunk",
@@ -17,6 +17,7 @@
     "min_phantom_version": "5.0.0",
     "python_version": "3",
     "app_wizard_version": "1.0.0",
+    "fips_compliant": true,
     "configuration": {
         "base_url": {
             "description": "The Base URL for REST connections",
@@ -145,7 +146,7 @@
         },
         {
             "action": "csv from artifacts",
-            "description": "Given a container_id create a csv in the vault from all the container's artifacts.",
+            "description": "Given a container_id create a csv in the vault from all the container's artifacts",
             "type": "generic",
             "identifier": "create_csv",
             "read_only": true,
@@ -157,7 +158,7 @@
                     "order": 0
                 },
                 "page_size": {
-                    "description": "The number of pages to retrieve.",
+                    "description": "The number of pages to retrieve",
                     "data_type": "numeric",
                     "default": 1000,
                     "order": 1
@@ -168,7 +169,7 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "column_name": "Status",
-                    "column_order": 2,
+                    "column_order": 1,
                     "example_values": [
                         "success",
                         "failed"
@@ -178,7 +179,7 @@
                     "data_path": "action_result.parameter.container_id",
                     "data_type": "numeric",
                     "column_name": "Container ID",
-                    "column_order": 1
+                    "column_order": 0
                 },
                 {
                     "data_path": "action_result.parameter.page_size",
