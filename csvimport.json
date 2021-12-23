@@ -6,11 +6,11 @@
     "product_vendor": "Splunk",
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
-    "product_name": "CSV",
+    "product_name": "CSV Import",
     "product_version_regex": ".*",
     "publisher": "Splunk",
-    "license": "Copyright (c) 2018-2021 Splunk Inc.",
-    "app_version": "2.0.0",
+    "license": "Copyright (c) 2021 Splunk Inc.",
+    "app_version": "1.0.0",
     "utctime_updated": "2018-11-13T22:04:02.279194Z",
     "package_name": "phantom_csvimport",
     "main_module": "csvimport_connector.py",
@@ -96,27 +96,43 @@
                 },
                 {
                     "data_path": "action_result.parameter.artifact_label",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "events"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.artifact_name",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "artifact"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.cef_column_headers",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "header_1",
+                        "header_2"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.container_id",
                     "data_type": "numeric",
                     "column_name": "Container ID",
-                    "column_order": 1
+                    "column_order": 1,
+                    "example_values": [
+                        123
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.vault_id",
                     "data_type": "string",
                     "column_name": "Vault ID",
-                    "column_order": 0
+                    "column_order": 0,
+                    "example_values": [
+                        "285ed37b6be7b4bf1583b59150b22e9a741caede"
+                    ]
                 },
                 {
                     "data_path": "action_result.data",
@@ -179,11 +195,17 @@
                     "data_path": "action_result.parameter.container_id",
                     "data_type": "numeric",
                     "column_name": "Container ID",
-                    "column_order": 0
+                    "column_order": 0,
+                    "example_values": [
+                        123
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.page_size",
-                    "data_type": "numeric"
+                    "data_type": "numeric",
+                    "example_values": [
+                        1000
+                    ]
                 },
                 {
                     "data_path": "action_result.data",
