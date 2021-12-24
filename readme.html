@@ -10,6 +10,38 @@ either express or implied. See the License for the specific language governing p
 and limitations under the License.
 -->
 <html><head></head><body>
-<b>Port Information :</b> <br><br>
-Matched regex 'CSV|Import' (16 times) using app's name/product_name json fields in local copy of iana common service ports file. (See https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml) Please check if this app requires specific ports open on Phantom instance and add to app's documentation.
+The auth_token config parameter is for use with Phantom instances. If both the token and username/password are given, the username and password will be used to authenticate to the Phantom instance.
+<br><br>
+Note that the IP (or name) being used must match the allowed IP in the remote Phantom instance's REST asset configuration.
+<br><br>
+In case the <b>phantom_server</b> configuration parameter is set to the current Phantom instance, i.e., the Phantom server through which the app is being used, then the <b>verify_certificate</b> should be set to False in the asset configuration.
+<br><br>
+For information on how to obtain an authorization token, see Provisioning an Authorization Token in the Phantom REST Overview documentation.
+<br><br>
+If the value provided in the <b>phantom_server</b> configuration parameter is 0.0.0.0 then the <b>test connectivity</b> passes successfully and the actions will run on the current phantom instance, i.e., the server through which the app is being used.
+<br><br>
+See <a href="https://my.phantom.us/kb/7/" target="_blank">KB article 7</a> and <a href="https://my.phantom.us/kb/16/" target="_blank">KB article 16</a> on how to create and verify a valid HTTPS certificate for your Phantom instance.
+<br><br>
+For security reasons, accessing 127.0.0.1 is not allowed.<br><br>
+
+<p>
+  The app uses HTTP/ HTTPS protocol for communicating with the phantom server. Below are the default ports used by Splunk SOAR.
+  <table>
+      <tr class=plain>
+          <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Service Name</th>
+          <th>Transport Protocol</th>
+          <th>Port</th>
+      </tr>
+      <tr>
+          <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http</td>
+          <td>tcp</td>
+          <td>80</td>
+      </tr>
+      <tr>
+          <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https</td>
+          <td>tcp</td>
+          <td>443</td>
+      </tr>
+  </table>
+</p>
 </body></html>

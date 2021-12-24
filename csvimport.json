@@ -19,19 +19,32 @@
     "app_wizard_version": "1.0.0",
     "fips_compliant": true,
     "configuration": {
-        "base_url": {
-            "description": "The Base URL for REST connections",
+        "phantom_server": {
             "data_type": "string",
-            "required": true,
-            "default": "https://127.0.0.1",
-            "order": 0
+            "order": 0,
+            "description": "Phantom IP or Hostname (e.g. 10.1.1.10 or valid_phantom_hostname)",
+            "required": true
         },
         "auth_token": {
-            "description": "Phantom user auth token",
             "data_type": "password",
-            "required": true,
-            "default": "",
-            "order": 1
+            "order": 1,
+            "description": "Phantom Auth token"
+        },
+        "username": {
+            "data_type": "string",
+            "order": 2,
+            "description": "Username (for HTTP basic auth)"
+        },
+        "password": {
+            "data_type": "password",
+            "order": 3,
+            "description": "Password (for HTTP basic auth)"
+        },
+        "verify_certificate": {
+            "data_type": "boolean",
+            "order": 4,
+            "description": "Verify HTTPS certificate (default: false)",
+            "default": false
         }
     },
     "actions": [
