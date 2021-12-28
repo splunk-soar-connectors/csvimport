@@ -52,6 +52,44 @@ class CsvImportConnector(BaseConnector):
         self._verify_cert = None
         self._auth = None
 
+    def _get_error_message_from_exception(self, e):
+        """ This method is used to get appropriate error message from the exception.
+        :param e: Exception object
+        :return: error message
+        """
+        try:
+            if hasattr(e, 'args'):
+                if len(e.args) > 1:
+                    error_code = e.args[0]
+                    error_msg = e.args[1]
+                elif len(e.args) == 1:
+                    error_code = ERR_CODE_UNAVAILABLE
+                    error_msg = e.args[0]
+            else:
+                error_code = ERR_CODE_UNAVAILABLE
+                error_msg = ERR_MSG_UNAVAILABLE
+        except Exception:
+            error_code = ERR_CODE_UNAVAILABLE
+            error_msg = ERR_MSG_UNAVAILABLE
+
+        try:
+            error_msg = self._handle_py_ver_compat_for_input_str(error_msg)
+        except TypeError:
+            error_msg = 'Type Error'
+        except Exception:
+            error_msg = ERR_MSG_UNAVAILABLE
+
+        try:
+            if error_code in ERR_CODE_UNAVAILABLE:
+                error_text = "Error Message: {0}".format(error_msg)
+            else:
+                error_text = "Error Code: {0}. Error Message: {1}".format(error_code, error_msg)
+        except Exception:
+            self.debug_print("Error occurred while parsing the error message")
+            error_text = 'Parse Error'
+
+        return error_text
+
     def _process_empty_response(self, response, action_result):
 
         if response.status_code == 200:
@@ -149,12 +187,6 @@ class CsvImportConnector(BaseConnector):
         # Create the headers
         if headers is None:
             headers = {}
-
-        try:
-            headers = json.loads(headers)
-        except Exception as e:
-            return action_result.set_status(phantom.APP_ERROR, "Unable to load headers as JSON: {}".format(
-                self._get_error_message_from_exception(e)))
 
         # auth_token is a bit tricky, it can be in the params or config
         auth_token = config.get('auth_token')

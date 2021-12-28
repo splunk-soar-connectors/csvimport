@@ -13,6 +13,8 @@
 # and limitations under the License.
 #
 
+ERR_CODE_UNAVAILABLE = "Error code unavailable"
+ERR_MSG_UNAVAILABLE = "Unknown error occurred. Please check the asset configuration and|or action parameters."
 CSVIMPORT_INVALID_INT = "Please provide a valid integer value in the {param}"
 CSVIMPORT_ERR_NEGATIVE_INT_PARAM = "Please provide a valid non-negative integer value in the {param}"
 CSVIMPORT_ERR_INVALID_PARAM = "Please provide a non-zero positive integer in the {param}"
