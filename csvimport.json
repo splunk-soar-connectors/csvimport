@@ -18,46 +18,8 @@
     "python_version": "3",
     "app_wizard_version": "1.0.0",
     "fips_compliant": true,
-    "configuration": {
-        "phantom_server": {
-            "data_type": "string",
-            "order": 0,
-            "description": "Phantom IP or Hostname (e.g. 10.1.1.10 or valid_phantom_hostname)",
-            "required": true
-        },
-        "auth_token": {
-            "data_type": "password",
-            "order": 1,
-            "description": "Phantom Auth token"
-        },
-        "username": {
-            "data_type": "string",
-            "order": 2,
-            "description": "Username (for HTTP basic auth)"
-        },
-        "password": {
-            "data_type": "password",
-            "order": 3,
-            "description": "Password (for HTTP basic auth)"
-        },
-        "verify_certificate": {
-            "data_type": "boolean",
-            "order": 4,
-            "description": "Verify HTTPS certificate (default: false)",
-            "default": false
-        }
-    },
+    "configuration": {},
     "actions": [
-        {
-            "action": "test connectivity",
-            "description": "Validate the asset configuration for connectivity using supplied configuration",
-            "type": "test",
-            "identifier": "test_connectivity",
-            "read_only": true,
-            "parameters": {},
-            "output": [],
-            "versions": "EQ(*)"
-        },
         {
             "action": "ingest csv",
             "description": "Read contents of a CSV and create artifact",
@@ -148,8 +110,15 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data",
-                    "data_type": "string"
+                    "data_path": "action_result.data.*.vault_id",
+                    "data_type": "string",
+                    "contains": [
+                        "sha1",
+                        "vault id"
+                    ],
+                    "example_values": [
+                        "b90e6c7ab7f77d058efd444279b81c4c6a9cf4ce"
+                    ]
                 },
                 {
                     "data_path": "action_result.summary",
@@ -221,8 +190,22 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data",
-                    "data_type": "string"
+                    "data_path": "action_result.data.*.vault_id",
+                    "data_type": "string",
+                    "contains": [
+                        "sha1",
+                        "vault id"
+                    ],
+                    "example_values": [
+                        "b90e6c7ab7f77d058efd444279b81c4c6a9cf4ce"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.file_name",
+                    "data_type": "string",
+                    "example_values": [
+                        "test.csv"
+                    ]
                 },
                 {
                     "data_path": "action_result.summary",

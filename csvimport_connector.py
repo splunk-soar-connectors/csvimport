@@ -15,18 +15,16 @@
 
 import csv
 import json
-import socket
 import sys
+from datetime import datetime
 
 # Phantom App imports
 import phantom.app as phantom
 import phantom.rules as phantomrules
-import phantom.utils as ph_utils
 import requests
 from bs4 import BeautifulSoup
 from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
-from requests.exceptions import SSLError, Timeout
 
 from csvimport_consts import *
 
@@ -45,50 +43,11 @@ class CsvImportConnector(BaseConnector):
 
         self._state = None
 
-        # Variable to hold a base_ur in case the app makes REST calls
+        # Variable to hold a base_url in case the app makes REST calls
         # Do note that the app json defines the asset config, so please
         # modify this as you deem fit.
-        self._base_uri = None
-        self._verify_cert = None
-        self._auth = None
-
-    def _get_error_message_from_exception(self, e):
-        """ This method is used to get appropriate error message from the exception.
-        :param e: Exception object
-        :return: error message
-        """
-        try:
-            if hasattr(e, 'args'):
-                if len(e.args) > 1:
-                    error_code = e.args[0]
-                    error_msg = e.args[1]
-                elif len(e.args) == 1:
-                    error_code = ERR_CODE_UNAVAILABLE
-                    error_msg = e.args[0]
-            else:
-                error_code = ERR_CODE_UNAVAILABLE
-                error_msg = ERR_MSG_UNAVAILABLE
-        except Exception:
-            error_code = ERR_CODE_UNAVAILABLE
-            error_msg = ERR_MSG_UNAVAILABLE
-
-        try:
-            error_msg = self._handle_py_ver_compat_for_input_str(error_msg)
-        except TypeError:
-            error_msg = 'Type Error'
-        except Exception:
-            error_msg = ERR_MSG_UNAVAILABLE
-
-        try:
-            if error_code in ERR_CODE_UNAVAILABLE:
-                error_text = "Error Message: {0}".format(error_msg)
-            else:
-                error_text = "Error Code: {0}. Error Message: {1}".format(error_code, error_msg)
-        except Exception:
-            self.debug_print("Error occurred while parsing the error message")
-            error_text = 'Parse Error'
-
-        return error_text
+        self._base_url = None
+        self._auth_token = None
 
     def _process_empty_response(self, response, action_result):
 
@@ -172,10 +131,8 @@ class CsvImportConnector(BaseConnector):
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
-    def _make_rest_call(self, endpoint, action_result, method="get", headers=None, params=None, data=None, ignore_auth=False):
+    def _make_rest_call(self, endpoint, action_result, method="get", **kwargs):
         # **kwargs can be any additional parameters that requests.request accepts
-
-        config = self.get_config()
 
         resp_json = None
 
@@ -184,76 +141,19 @@ class CsvImportConnector(BaseConnector):
         except AttributeError:
             return RetVal(action_result.set_status(phantom.APP_ERROR, "Invalid method: {0}".format(method)), resp_json)
 
-        # Create the headers
-        if headers is None:
-            headers = {}
-
-        # auth_token is a bit tricky, it can be in the params or config
-        auth_token = config.get('auth_token')
-
-        if auth_token and ('ph-auth-token' not in headers):
-            headers['ph-auth-token'] = auth_token
-
-        if 'Content-Type' not in headers:
-            headers.update({'Content-Type': 'application/json'})
-
-        auth = self._auth
-
-        # To avoid '//' in the URL(due to self._base_uri + endpoint)
-        self._base_uri = self._base_uri.strip('/')
-
-        if ignore_auth:
-            auth = None
-            if 'ph-auth-token' in headers:
-                del headers['ph-auth-token']
-
+        # Create a URL to connect to
+        url = self._base_url + endpoint
+        self.save_progress("Connecting to endpoint: {}".format(url))
         try:
-            response = request_func(self._base_uri + endpoint,
-                                    auth=auth,
-                                    json=data,
-                                    headers=headers,
-                                    verify=False if ignore_auth else self._verify_cert,
-                                    params=params,
-                                    timeout=TIMEOUT)
-
-        except Timeout as e:
-            return RetVal(action_result.set_status(phantom.APP_ERROR,
-                                                   "Request timed out: {}".format(
-                                                       self._get_error_message_from_exception(e))), None)
-        except SSLError as e:
-            return RetVal(action_result.set_status(phantom.APP_ERROR,
-                                                   "HTTPS SSL validation failed: {}".format(
-                                                       self._get_error_message_from_exception(e))), None)
+            r = request_func(
+                url,
+                verify=False,
+                **kwargs)
         except Exception as e:
-            return RetVal(action_result.set_status(phantom.APP_ERROR,
-                                                   "Error connecting to server. Error Details: {}".format(
-                                                       self._get_error_message_from_exception(e))), None)
+            return RetVal(action_result.set_status(phantom.APP_ERROR, "Error Connecting to server. Details: {0}".format(str(e))),
+                          resp_json)
 
-        return self._process_response(response, action_result)
-
-    def _handle_test_connectivity(self, param):
-
-        # Add an action result object to self (BaseConnector) to represent the action for this param
-        action_result = self.add_action_result(ActionResult(dict(param)))
-
-        # NOTE: test connectivity does _NOT_ take any parameters
-        # i.e. the param dictionary passed to this handler will be empty.
-        # Also typically it does not add any data into an action_result either.
-        # The status and progress messages are more important.
-
-        self.save_progress("Connecting to endpoint")
-        # make rest call
-        ret_val, response = self._make_rest_call('/rest/version', action_result)
-
-        if phantom.is_fail(ret_val):
-            # the call to the 3rd party device or service failed, action result should contain all the error details
-            # for now the return is commented out, but after implementation, return from here
-            self.save_progress("Test Connectivity Failed.")
-            return action_result.get_status()
-
-        # Return success
-        self.save_progress("Test Connectivity Passed")
-        return action_result.set_status(phantom.APP_SUCCESS)
+        return self._process_response(r, action_result)
 
     def _get_file_info_from_vault(self, action_result, vault_id, file_type=None):
         file_info = {
@@ -294,14 +194,24 @@ class CsvImportConnector(BaseConnector):
                     i.update(temp)
             for j in list(i.keys()):
                 fieldnames.add(j)
-        with open('/opt/phantom/vault/tmp/csv_output.csv', 'w') as csvfile:
+        curr_time = datetime.now().strftime("%Y_%m_%d_%I_%M_%S")
+        filename = "csv_output_" + curr_time + ".csv"
+        file_loc = "/opt/phantom/vault/tmp/" + filename
+        with open(file_loc, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=list(fieldnames))
             writer.writeheader()
             for row in response['data']:
                 writer.writerow(row)
-        phantomrules.vault_add(container=container_id,
-                               file_location="/opt/phantom/vault/tmp/csv_output.csv",
-                               file_name="csv_output.csv")
+        vault_ret_dict = phantomrules.vault_add(container=container_id,
+                                                file_location=file_loc,
+                                                file_name=filename)
+        if vault_ret_dict[0]:
+            vault_details = {
+                phantom.APP_JSON_VAULT_ID: vault_ret_dict[2],
+                'file_name': filename
+            }
+            action_result.add_data(vault_details)
+
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_ingest_csv(self, param):
@@ -311,14 +221,12 @@ class CsvImportConnector(BaseConnector):
             return action_result.get_status()
         vault_id = param['vault_id']
         artifact_name = param['artifact_name']
-        artifact_label = param.get('artifact_label')
+        artifact_label = param.get('artifact_label', 'events')
         cef_names = param['cef_column_headers']
 
         if cef_names:
             cef_names = [x.strip() for x in cef_names.split(',')]
             cef_names = list(filter(None, cef_names))
-        if not artifact_label:
-            artifact_label = "events"
         num_columns = len(cef_names)
 
         # Make sure container exists first, provide a better error message than waiting for save_artifacts to fail
@@ -346,7 +254,7 @@ class CsvImportConnector(BaseConnector):
                         identifier=None,
                         artifact_type=artifact_label)
                     # self.save_progress("****JSON : {0}".format(artifact_json))
-
+        action_result.add_data({'vault_id': vault_id})
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _validate_integer(self, action_result, parameter, key, allow_zero=False):
@@ -379,8 +287,6 @@ class CsvImportConnector(BaseConnector):
             ret_val = self._handle_ingest_csv(param)
         if action_id == 'create_csv':
             ret_val = self._handle_create_csv(param)
-        if action_id == 'test_connectivity':
-            ret_val = self._handle_test_connectivity(param)
 
         return ret_val
 
@@ -390,55 +296,7 @@ class CsvImportConnector(BaseConnector):
         # that needs to be accessed across actions
         self._state = self.load_state()
 
-        # get the asset config
-        config = self.get_config()
-
-        """
-        # Access values in asset config by the name
-
-        # Required values can be accessed directly
-        required_config_name = config['required_config_name']
-
-        # Optional values should use the .get() function
-        optional_config_name = config.get('optional_config_name')
-        """
-
-        host = config['phantom_server']
-
-        if host.startswith('http:') or host.startswith('https:'):
-            return self.set_status(phantom.APP_ERROR,
-                                   'Please specify the actual IP or hostname used by the Phantom '
-                                   'instance in the Asset config wihtout http: or https:')
-
-        # Split hostname from port
-        host = host.split(':')[0]
-
-        if ph_utils.is_ip(host):
-            try:
-                packed = socket.inet_aton(host)
-                unpacked = socket.inet_ntoa(packed)
-            except Exception as e:
-                return self.set_status(phantom.APP_ERROR, "Unable to do ip to name conversion on {0}".format(host),
-                                       self._get_error_message_from_exception(e))
-        else:
-            try:
-                unpacked = socket.gethostbyname(host)
-            except Exception:
-                return self.set_status(phantom.APP_ERROR, "Unable to do name to ip conversion on {0}".format(host))
-
-        if unpacked.startswith('127.'):
-            return self.set_status(phantom.APP_ERROR, CSVIMPORT_ERR_SPECIFY_IP_HOSTNAME)
-
-        if '127.0.0.1' in host or 'localhost' in host:
-            return self.set_status(phantom.APP_ERROR, CSVIMPORT_ERR_SPECIFY_IP_HOSTNAME)
-
-        self._base_uri = 'https://{}'.format(config['phantom_server'])
-        self._verify_cert = config.get('verify_certificate', False)
-
-        self._auth = None
-
-        if config.get('username') and config.get('password'):
-            self._auth = (config.get('username'), config.get('password'))
+        self._base_url = 'https://127.0.0.1'
 
         return phantom.APP_SUCCESS
 
