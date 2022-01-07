@@ -1,3 +1,2 @@
 **Unreleased**
-
-* Initial py3 release [PAPP-7226]
+* Initial release with python3 compatibility [PAPP-7226]

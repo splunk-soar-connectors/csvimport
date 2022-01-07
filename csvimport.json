@@ -34,7 +34,7 @@
                     "order": 0
                 },
                 "container_id": {
-                    "description": "The container_id for the vault containing the csv",
+                    "description": "Create artifacts on given container ID",
                     "data_type": "numeric",
                     "required": true,
                     "order": 1
@@ -144,7 +144,7 @@
         },
         {
             "action": "csv from artifacts",
-            "description": "Given a container_id create a csv in the vault from all the container's artifacts",
+            "description": "Create the csv in the vault from the artifacts of container",
             "type": "generic",
             "identifier": "create_csv",
             "read_only": true,
