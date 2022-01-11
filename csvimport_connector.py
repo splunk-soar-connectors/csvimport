@@ -258,7 +258,7 @@ class CsvImportConnector(BaseConnector):
                             identifier=None,
                             artifact_type=artifact_label)
                         # self.save_progress("****JSON : {0}".format(artifact_json))
-                except Exception as e:
+                except Exception:
                     return action_result.set_status(
                         phantom.APP_ERROR, "Error while performing file operation. File:{0}".format(csv_vault_path))
         data = {'vault_id': vault_id}

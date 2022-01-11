@@ -18,6 +18,42 @@
     "python_version": "3",
     "app_wizard_version": "1.0.0",
     "fips_compliant": true,
+    "pip_dependencies": {
+        "wheel": [
+            {
+                "module": "backports.functools_lru_cache",
+                "input_file": "wheels/backports.functools_lru_cache-1.6.4-py2.py3-none-any.whl"
+            },
+            {
+                "module": "beautifulsoup4",
+                "input_file": "wheels/beautifulsoup4-4.9.1-py2-none-any.whl"
+            },
+            {
+                "module": "certifi",
+                "input_file": "wheels/certifi-2021.10.8-py2.py3-none-any.whl"
+            },
+            {
+                "module": "chardet",
+                "input_file": "wheels/chardet-3.0.4-py2.py3-none-any.whl"
+            },
+            {
+                "module": "idna",
+                "input_file": "wheels/idna-2.10-py2.py3-none-any.whl"
+            },
+            {
+                "module": "requests",
+                "input_file": "wheels/requests-2.25.0-py2.py3-none-any.whl"
+            },
+            {
+                "module": "soupsieve",
+                "input_file": "wheels/soupsieve-1.9.6-py2.py3-none-any.whl"
+            },
+            {
+                "module": "urllib3",
+                "input_file": "wheels/urllib3-1.26.7-py2.py3-none-any.whl"
+            }
+        ]
+    },
     "configuration": {},
     "actions": [
         {
@@ -35,7 +71,8 @@
                         "sha1",
                         "vault id"
                     ],
-                    "order": 0
+                    "order": 0,
+                    "primary": true
                 },
                 "container_id": {
                     "description": "Create artifacts on given container ID",
@@ -164,7 +201,7 @@
                     "order": 0
                 },
                 "limit": {
-                    "description": "The number of pages to retrieve",
+                    "description": "The number of artifacts to retrieve",
                     "data_type": "numeric",
                     "default": 1000,
                     "order": 1

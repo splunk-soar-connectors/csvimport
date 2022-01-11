@@ -18,5 +18,3 @@ ERR_MSG_UNAVAILABLE = "Unknown error occurred. Please check the action parameter
 CSVIMPORT_INVALID_INT = "Please provide a valid integer value in the {param}"
 CSVIMPORT_ERR_NEGATIVE_INT_PARAM = "Please provide a valid non-negative integer value in the {param}"
 CSVIMPORT_ERR_INVALID_PARAM = "Please provide a non-zero positive integer in the {param}"
-CSVIMPORT_ERR_SPECIFY_IP_HOSTNAME = "Accessing 127.0.0.1 is not allowed. Please specify the actual IP " \
-                                  "or hostname used by the Phantom instance in the Asset config"
