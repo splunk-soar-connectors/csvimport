@@ -1,5 +1,5 @@
 # File: csvimport_connector.py
-# Copyright (c) 2021 Splunk Inc.
+# Copyright (c) 2022 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -180,12 +180,14 @@ class CsvImportConnector(BaseConnector):
         ret_val, container_id = self._validate_integer(action_result, param["container_id"], 'Container ID', False)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
-        ret_val, page_size = self._validate_integer(action_result, param.get('page_size', 1000), 'Page Size', False)
+        ret_val, page_size = self._validate_integer(action_result, param.get('limit', 1000), 'Limit', False)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         ret_val, response = self._make_rest_call('/rest/artifact?_filter_container_id={0}&page_size={1}'.format(
             container_id, page_size), action_result)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
         fieldnames = set()
         for i in response['data']:
             for key, val in list(i.items()):
@@ -211,8 +213,9 @@ class CsvImportConnector(BaseConnector):
                 'file_name': filename
             }
             action_result.add_data(vault_details)
+            return action_result.set_status(phantom.APP_SUCCESS, "Successfully Created CSV")
 
-        return action_result.set_status(phantom.APP_SUCCESS)
+        return action_result.set_status(phantom.APP_ERROR, 'Error adding file to vault: {0}'.format(vault_ret_dict))
 
     def _handle_ingest_csv(self, param):
         action_result = self.add_action_result(ActionResult(dict(param)))
@@ -243,19 +246,24 @@ class CsvImportConnector(BaseConnector):
             self.save_progress("****File Info : {0}".format(file_info))
             csv_vault_path = file_info['path']
             with open(csv_vault_path, "r") as csvf:
-                reader = csv.reader(csvf)
-                for row in reader:
-                    cef = {}
-                    for i in range(num_columns):
-                        cef[cef_names[i]] = row[i]
-                    phantomrules.add_artifact(
-                        container=container_id, raw_data={}, cef_data=cef, label=artifact_label,
-                        name=artifact_name, severity='high',
-                        identifier=None,
-                        artifact_type=artifact_label)
-                    # self.save_progress("****JSON : {0}".format(artifact_json))
-        action_result.add_data({'vault_id': vault_id})
-        return action_result.set_status(phantom.APP_SUCCESS)
+                try:
+                    reader = csv.reader(csvf)
+                    for row in reader:
+                        cef = {}
+                        for i in range(num_columns):
+                            cef[cef_names[i]] = row[i]
+                        phantomrules.add_artifact(
+                            container=container_id, raw_data={}, cef_data=cef, label=artifact_label,
+                            name=artifact_name, severity='high',
+                            identifier=None,
+                            artifact_type=artifact_label)
+                        # self.save_progress("****JSON : {0}".format(artifact_json))
+                except Exception as e:
+                    return action_result.set_status(
+                        phantom.APP_ERROR, "Error while performing file operation. File:{0}".format(csv_vault_path))
+        data = {'vault_id': vault_id}
+        action_result.add_data(data)
+        return action_result.set_status(phantom.APP_SUCCESS, 'Successfully Ingested CSV')
 
     def _validate_integer(self, action_result, parameter, key, allow_zero=False):
         if parameter is not None:
@@ -273,6 +281,26 @@ class CsvImportConnector(BaseConnector):
                 return action_result.set_status(phantom.APP_ERROR, CSVIMPORT_ERR_INVALID_PARAM.format(param=key)), None
 
         return phantom.APP_SUCCESS, parameter
+
+    def _get_error_message_from_exception(self, e):
+        """ This method is used to get appropriate error message from the exception.
+        :param e: Exception object
+        :return: error message
+        """
+
+        error_code = ERR_CODE_UNAVAILABLE
+        error_msg = ERR_MSG_UNAVAILABLE
+        try:
+            if hasattr(e, 'args'):
+                if len(e.args) > 1:
+                    error_code = e.args[0]
+                    error_msg = e.args[1]
+                elif len(e.args) == 1:
+                    error_msg = e.args[0]
+        except Exception:
+            pass
+
+        return "Error Code: {0}. Error Message: {1}".format(error_code, error_msg)
 
     def handle_action(self, param):
 
@@ -296,7 +324,7 @@ class CsvImportConnector(BaseConnector):
         # that needs to be accessed across actions
         self._state = self.load_state()
 
-        self._base_url = 'https://127.0.0.1'
+        self._base_url = CsvImportConnector._get_phantom_base_url()
 
         return phantom.APP_SUCCESS
 

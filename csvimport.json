@@ -31,6 +31,10 @@
                     "description": "The vault_id for the csv",
                     "data_type": "string",
                     "required": true,
+                    "contains": [
+                        "sha1",
+                        "vault id"
+                    ],
                     "order": 0
                 },
                 "container_id": {
@@ -103,6 +107,10 @@
                 {
                     "data_path": "action_result.parameter.vault_id",
                     "data_type": "string",
+                    "contains": [
+                        "sha1",
+                        "vault id"
+                    ],
                     "column_name": "Vault ID",
                     "column_order": 0,
                     "example_values": [
@@ -155,7 +163,7 @@
                     "required": true,
                     "order": 0
                 },
-                "page_size": {
+                "limit": {
                     "description": "The number of pages to retrieve",
                     "data_type": "numeric",
                     "default": 1000,
@@ -167,7 +175,7 @@
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "column_name": "Status",
-                    "column_order": 1,
+                    "column_order": 3,
                     "example_values": [
                         "success",
                         "failed"
@@ -183,7 +191,7 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.page_size",
+                    "data_path": "action_result.parameter.limit",
                     "data_type": "numeric",
                     "example_values": [
                         1000
@@ -192,6 +200,8 @@
                 {
                     "data_path": "action_result.data.*.vault_id",
                     "data_type": "string",
+                    "column_name": "Vault ID",
+                    "column_order": 1,
                     "contains": [
                         "sha1",
                         "vault id"
@@ -203,6 +213,8 @@
                 {
                     "data_path": "action_result.data.*.file_name",
                     "data_type": "string",
+                    "column_name": "File Name",
+                    "column_order": 2,
                     "example_values": [
                         "test.csv"
                     ]

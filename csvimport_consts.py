@@ -1,5 +1,5 @@
 # File: csvimport_consts.py
-# Copyright (c) 2021 Splunk Inc.
+# Copyright (c) 2022 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
 #
 
 ERR_CODE_UNAVAILABLE = "Error code unavailable"
-ERR_MSG_UNAVAILABLE = "Unknown error occurred. Please check the asset configuration and|or action parameters."
+ERR_MSG_UNAVAILABLE = "Unknown error occurred. Please check the action parameters."
 CSVIMPORT_INVALID_INT = "Please provide a valid integer value in the {param}"
 CSVIMPORT_ERR_NEGATIVE_INT_PARAM = "Please provide a valid non-negative integer value in the {param}"
 CSVIMPORT_ERR_INVALID_PARAM = "Please provide a non-zero positive integer in the {param}"
 CSVIMPORT_ERR_SPECIFY_IP_HOSTNAME = "Accessing 127.0.0.1 is not allowed. Please specify the actual IP " \
                                   "or hostname used by the Phantom instance in the Asset config"
-TIMEOUT = 120
