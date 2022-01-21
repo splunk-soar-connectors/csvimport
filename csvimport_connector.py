@@ -25,6 +25,7 @@ import requests
 from bs4 import BeautifulSoup
 from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
+from phantom.vault import Vault
 
 from csvimport_consts import *
 
@@ -198,7 +199,11 @@ class CsvImportConnector(BaseConnector):
                 fieldnames.add(j)
         curr_time = datetime.now().strftime("%Y_%m_%d_%I_%M_%S")
         filename = "csv_output_" + curr_time + ".csv"
-        file_loc = "/opt/phantom/vault/tmp/" + filename
+        if hasattr(Vault, 'get_vault_tmp_dir'):
+            vault_tmp_dir = Vault.get_vault_tmp_dir()
+        else:
+            vault_tmp_dir = '/opt/phantom/vault/tmp'
+        file_loc = vault_tmp_dir + filename
         with open(file_loc, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=list(fieldnames))
             writer.writeheader()
