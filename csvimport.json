@@ -10,7 +10,7 @@
     "product_version_regex": ".*",
     "publisher": "Splunk",
     "license": "Copyright (c) 2022 Splunk Inc.",
-    "app_version": "1.0.3",
+    "app_version": "1.0.4",
     "utctime_updated": "2022-01-21T18:45:36.000000Z",
     "package_name": "phantom_csvimport",
     "main_module": "csvimport_connector.py",
@@ -151,7 +151,7 @@
                     "column_name": "Vault ID",
                     "column_order": 0,
                     "example_values": [
-                        "285ed37b6be7b4bf1583b59150b22e9a741caede"
+                        "exampleb90e6c7ab7f77d058efd444279b81c4c6"
                     ]
                 },
                 {
@@ -162,7 +162,7 @@
                         "vault id"
                     ],
                     "example_values": [
-                        "b90e6c7ab7f77d058efd444279b81c4c6a9cf4ce"
+                        "exampleb90e6c7ab7f77d058efd444279b81c4c6"
                     ]
                 },
                 {
@@ -244,7 +244,7 @@
                         "vault id"
                     ],
                     "example_values": [
-                        "b90e6c7ab7f77d058efd444279b81c4c6a9cf4ce"
+                        "exampleb90e6c7ab7f77d058efd444279b81c4c6"
                     ]
                 },
                 {
