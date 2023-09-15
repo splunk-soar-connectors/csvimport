@@ -254,6 +254,7 @@ class CsvImportConnector(BaseConnector):
             self.save_progress("****File Info : {0}".format(file_info))
             csv_vault_path = file_info['path']
             with open(csv_vault_path, "r") as csvf:
+                artifacts_list = []
                 try:
                     reader = csv.reader(csvf)
                     for row in reader:
@@ -268,8 +269,14 @@ class CsvImportConnector(BaseConnector):
                             "severity": "high",
                             "type": artifact_label
                         }
-                        url = "{}{}".format(self._get_phantom_base_url().strip('/'), "/rest/artifact")
-                        _ = requests.post(url, json.dumps(artifact_json), verify=False)
+                        artifacts_list.append(artifact_json)
+                    if artifacts_list:
+                        create_artifacts_status, create_artifacts_msg, _ = self.save_artifacts(artifacts_list)
+                        self.debug_print("Print artifacts Status: {}".format(create_artifacts_msg))
+                        self.debug_print("Print Artifacts Message: {}".format(create_artifacts_status))
+                        if phantom.is_fail(create_artifacts_status):
+                            self.debug_print("Error saving artifacts: {}".format(create_artifacts_msg))
+                            return action_result.set_status(phantom.APP_ERROR, "Error saving artifacts: {}".format(create_artifacts_msg))
 
                 except Exception:
                     return action_result.set_status(
