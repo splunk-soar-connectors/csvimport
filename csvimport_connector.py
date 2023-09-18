@@ -1,5 +1,5 @@
 # File: csvimport_connector.py
-# Copyright (c) 2022 Splunk Inc.
+# Copyright (c) 2022-2023 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -188,6 +188,7 @@ class CsvImportConnector(BaseConnector):
         ret_val, response = self._make_rest_call('/rest/artifact?_filter_container_id={0}&page_size={1}'.format(
             container_id, page_size), action_result)
         if phantom.is_fail(ret_val):
+            self.debug_print("Error while fetching artifact from the container")
             return action_result.get_status()
         fieldnames = set()
         for i in response['data']:
@@ -221,6 +222,7 @@ class CsvImportConnector(BaseConnector):
                 'file_name': filename
             }
             action_result.add_data(vault_details)
+            self.debug("Successfully Created CSV")
             return action_result.set_status(phantom.APP_SUCCESS, "Successfully Created CSV")
 
         return action_result.set_status(phantom.APP_ERROR, 'Error adding file to vault: {0}'.format(vault_ret_dict))
@@ -306,19 +308,19 @@ class CsvImportConnector(BaseConnector):
         :return: error message
         """
 
-        error_code = ERR_CODE_UNAVAILABLE
-        error_msg = ERR_MSG_UNAVAILABLE
+        err_code = ERR_CODE_UNAVAILABLE
+        err_msg = ERR_MSG_UNAVAILABLE
         try:
             if hasattr(e, 'args'):
                 if len(e.args) > 1:
-                    error_code = e.args[0]
-                    error_msg = e.args[1]
+                    err_code = e.args[0]
+                    err_msg = e.args[1]
                 elif len(e.args) == 1:
-                    error_msg = e.args[0]
+                    err_msg = e.args[0]
         except Exception:
             pass
 
-        return "Error Code: {0}. Error Message: {1}".format(error_code, error_msg)
+        return "Error Code: {0}. Error Message: {1}".format(err_code, err_msg)
 
     def handle_action(self, param):
 
