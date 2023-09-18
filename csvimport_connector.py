@@ -272,8 +272,6 @@ class CsvImportConnector(BaseConnector):
                         artifacts_list.append(artifact_json)
                     if artifacts_list:
                         create_artifacts_status, create_artifacts_msg, _ = self.save_artifacts(artifacts_list)
-                        self.debug_print("Print artifacts Status: {}".format(create_artifacts_msg))
-                        self.debug_print("Print Artifacts Message: {}".format(create_artifacts_status))
                         if phantom.is_fail(create_artifacts_status):
                             self.debug_print("Error saving artifacts: {}".format(create_artifacts_msg))
                             return action_result.set_status(phantom.APP_ERROR, "Error saving artifacts: {}".format(create_artifacts_msg))
