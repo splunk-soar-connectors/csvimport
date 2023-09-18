@@ -2,11 +2,11 @@
 # CSV Import
 
 Publisher: Splunk  
-Connector Version: 1\.0\.1  
+Connector Version: 1.0.3  
 Product Vendor: Splunk  
 Product Name: CSV Import  
-Product Version Supported (regex): "\.\*"  
-Minimum Product Version: 5\.0\.0  
+Product Version Supported (regex): ".\*"  
+Minimum Product Version: 5.0.0  
 
 Ingest CSV files into Phantom
 
@@ -23,26 +23,26 @@ Read only: **True**
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**vault\_id** |  required  | The vault\_id for the csv | string |  `sha1`  `vault id` 
-**container\_id** |  required  | Create artifacts on given container ID | numeric | 
-**cef\_column\_headers** |  required  | Comma separated list of the CEF columns \(e\.g\. ip,port,type,comment\) | string | 
-**artifact\_name** |  required  | Name for the artifact \(e\.g\. IP Artifact\) | string | 
-**artifact\_label** |  optional  | Label for the artifact \(e\.g\. IP\_test\) | string | 
+**vault_id** |  required  | The vault_id for the csv | string |  `sha1`  `vault id` 
+**container_id** |  required  | Create artifacts on given container ID | numeric | 
+**cef_column_headers** |  required  | Comma separated list of the CEF columns (e.g. ip,port,type,comment) | string | 
+**artifact_name** |  required  | Name for the artifact (e.g. IP Artifact) | string | 
+**artifact_label** |  optional  | Label for the artifact (e.g. IP_test) | string | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.artifact\_label | string | 
-action\_result\.parameter\.artifact\_name | string | 
-action\_result\.parameter\.cef\_column\_headers | string | 
-action\_result\.parameter\.container\_id | numeric | 
-action\_result\.parameter\.vault\_id | string |  `sha1`  `vault id` 
-action\_result\.data\.\*\.vault\_id | string |  `sha1`  `vault id` 
-action\_result\.summary | string | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric |   
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.artifact_label | string |  |   events 
+action_result.parameter.artifact_name | string |  |   artifact 
+action_result.parameter.cef_column_headers | string |  |   header_1  header_2 
+action_result.parameter.container_id | numeric |  |   123 
+action_result.parameter.vault_id | string |  `sha1`  `vault id`  |   285ed37b6be7b4bf1583b59150b22e9a741caede 
+action_result.data.\*.vault_id | string |  `sha1`  `vault id`  |   b90e6c7ab7f77d058efd444279b81c4c6a9cf4ce 
+action_result.summary | string |  |  
+action_result.message | string |  |  
+summary.total_objects | numeric |  |  
+summary.total_objects_successful | numeric |  |    
 
 ## action: 'csv from artifacts'
 Create the csv in the vault from the artifacts of container
@@ -53,18 +53,18 @@ Read only: **True**
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**container\_id** |  required  | The container\_id for the artifacts | numeric | 
+**container_id** |  required  | The container_id for the artifacts | numeric | 
 **limit** |  optional  | The number of artifacts to retrieve | numeric | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS
---------- | ---- | --------
-action\_result\.status | string | 
-action\_result\.parameter\.container\_id | numeric | 
-action\_result\.parameter\.limit | numeric | 
-action\_result\.data\.\*\.vault\_id | string |  `sha1`  `vault id` 
-action\_result\.data\.\*\.file\_name | string | 
-action\_result\.summary | string | 
-action\_result\.message | string | 
-summary\.total\_objects | numeric | 
-summary\.total\_objects\_successful | numeric | 
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |   success  failed 
+action_result.parameter.container_id | numeric |  |   123 
+action_result.parameter.limit | numeric |  |   1000 
+action_result.data.\*.vault_id | string |  `sha1`  `vault id`  |   b90e6c7ab7f77d058efd444279b81c4c6a9cf4ce 
+action_result.data.\*.file_name | string |  |   test.csv 
+action_result.summary | string |  |  
+action_result.message | string |  |  
+summary.total_objects | numeric |  |  
+summary.total_objects_successful | numeric |  |  
