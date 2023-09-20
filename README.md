@@ -2,7 +2,7 @@
 # CSV Import
 
 Publisher: Splunk  
-Connector Version: 1.0.3  
+Connector Version: 1.0.4  
 Product Vendor: Splunk  
 Product Name: CSV Import  
 Product Version Supported (regex): ".\*"  
