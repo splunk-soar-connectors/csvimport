@@ -10,7 +10,7 @@
     "product_version_regex": ".*",
     "publisher": "Splunk",
     "license": "Copyright (c) 2022-2023 Splunk Inc.",
-    "app_version": "1.0.3",
+    "app_version": "1.0.4",
     "utctime_updated": "2022-01-21T18:45:36.000000Z",
     "package_name": "phantom_csvimport",
     "main_module": "csvimport_connector.py",
