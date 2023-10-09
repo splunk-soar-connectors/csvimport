@@ -1,3 +1,3 @@
 **Unreleased**
-* Using save_artifacts() of connector object instead of using playbook api's add_artifact() function to save the artifacts [SOARHELP-2367]
-* Removed requests library in order to use platform packages [PAPP-30822]
+* Updated function for saving artifacts [SOARHELP-2367]
+* Removed requests library and its sub-dependencies [PAPP-30822, 31096]
