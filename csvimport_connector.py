@@ -222,8 +222,8 @@ class CsvImportConnector(BaseConnector):
                 'file_name': filename
             }
             action_result.add_data(vault_details)
-            self.debug_print("Successfully created CSV")
-            return action_result.set_status(phantom.APP_SUCCESS, "Successfully created CSV")
+            self.debug_print("Successfully Created CSV")
+            return action_result.set_status(phantom.APP_SUCCESS, "Successfully Created CSV")
 
         return action_result.set_status(phantom.APP_ERROR, 'Error adding file to vault: {0}'.format(vault_ret_dict))
 
