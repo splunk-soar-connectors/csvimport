@@ -1,1 +1,3 @@
 **Unreleased**
+* Updated function for saving artifacts [SOARHELP-2367]
+* Removed requests library and its sub-dependencies [PAPP-30822, 31096]

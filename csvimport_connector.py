@@ -1,5 +1,5 @@
 # File: csvimport_connector.py
-# Copyright (c) 2022 Splunk Inc.
+# Copyright (c) 2022-2023 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -188,6 +188,7 @@ class CsvImportConnector(BaseConnector):
         ret_val, response = self._make_rest_call('/rest/artifact?_filter_container_id={0}&page_size={1}'.format(
             container_id, page_size), action_result)
         if phantom.is_fail(ret_val):
+            self.debug_print("Error while fetching artifact from the container")
             return action_result.get_status()
         fieldnames = set()
         for i in response['data']:
@@ -221,6 +222,7 @@ class CsvImportConnector(BaseConnector):
                 'file_name': filename
             }
             action_result.add_data(vault_details)
+            self.debug_print("Successfully Created CSV")
             return action_result.set_status(phantom.APP_SUCCESS, "Successfully Created CSV")
 
         return action_result.set_status(phantom.APP_ERROR, 'Error adding file to vault: {0}'.format(vault_ret_dict))
@@ -254,18 +256,28 @@ class CsvImportConnector(BaseConnector):
             self.save_progress("****File Info : {0}".format(file_info))
             csv_vault_path = file_info['path']
             with open(csv_vault_path, "r") as csvf:
+                artifacts_list = []
                 try:
                     reader = csv.reader(csvf)
                     for row in reader:
                         cef = {}
                         for i in range(num_columns):
                             cef[cef_names[i]] = row[i]
-                        phantomrules.add_artifact(
-                            container=container_id, raw_data={}, cef_data=cef, label=artifact_label,
-                            name=artifact_name, severity='high',
-                            identifier=None,
-                            artifact_type=artifact_label)
-                        # self.save_progress("****JSON : {0}".format(artifact_json))
+                        artifact_json = {
+                            "container_id": container_id,
+                            "cef": cef,
+                            "label": artifact_label,
+                            "name": artifact_name,
+                            "severity": "high",
+                            "type": artifact_label
+                        }
+                        artifacts_list.append(artifact_json)
+                    if artifacts_list:
+                        create_artifacts_status, create_artifacts_msg, _ = self.save_artifacts(artifacts_list)
+                        if phantom.is_fail(create_artifacts_status):
+                            self.debug_print("Error saving artifacts: {}".format(create_artifacts_msg))
+                            return action_result.set_status(phantom.APP_ERROR, "Error saving artifacts: {}".format(create_artifacts_msg))
+
                 except Exception:
                     return action_result.set_status(
                         phantom.APP_ERROR, "Error while performing file operation. File:{0}".format(csv_vault_path))
@@ -296,19 +308,19 @@ class CsvImportConnector(BaseConnector):
         :return: error message
         """
 
-        error_code = ERR_CODE_UNAVAILABLE
-        error_msg = ERR_MSG_UNAVAILABLE
+        err_code = ERR_CODE_UNAVAILABLE
+        err_msg = ERR_MSG_UNAVAILABLE
         try:
             if hasattr(e, 'args'):
                 if len(e.args) > 1:
-                    error_code = e.args[0]
-                    error_msg = e.args[1]
+                    err_code = e.args[0]
+                    err_msg = e.args[1]
                 elif len(e.args) == 1:
-                    error_msg = e.args[0]
+                    err_msg = e.args[0]
         except Exception:
             pass
 
-        return "Error Code: {0}. Error Message: {1}".format(error_code, error_msg)
+        return "Error Code: {0}. Error Message: {1}".format(err_code, err_msg)
 
     def handle_action(self, param):
 
