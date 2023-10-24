@@ -6,7 +6,7 @@ Connector Version: 1.1.0
 Product Vendor: Splunk  
 Product Name: CSV Import  
 Product Version Supported (regex): ".\*"  
-Minimum Product Version: 6.1.0  
+Minimum Product Version: 6.0.0  
 
 Ingest CSV files into Phantom
 
