@@ -15,7 +15,7 @@
     "package_name": "phantom_csvimport",
     "main_module": "csvimport_connector.py",
     "min_phantom_version": "6.1.0",
-    "python_version": "3",
+    "python_version": "3.9, 3.13",
     "app_wizard_version": "1.0.0",
     "fips_compliant": true,
     "pip_dependencies": {
