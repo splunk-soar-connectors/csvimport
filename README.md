@@ -1,23 +1,23 @@
 # CSV Import
 
-Publisher: Splunk \
-Connector Version: 1.1.1 \
-Product Vendor: Splunk \
-Product Name: CSV Import \
+Publisher: Splunk <br>
+Connector Version: 1.1.1 <br>
+Product Vendor: Splunk <br>
+Product Name: CSV Import <br>
 Minimum Product Version: 6.1.0
 
 Ingest CSV files into Phantom
 
 ### Supported Actions
 
-[ingest csv](#action-ingest-csv) - Read contents of a CSV and create artifact \
+[ingest csv](#action-ingest-csv) - Read contents of a CSV and create artifact <br>
 [csv from artifacts](#action-csv-from-artifacts) - Create the csv in the vault from the artifacts of container
 
 ## action: 'ingest csv'
 
 Read contents of a CSV and create artifact
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -50,7 +50,7 @@ summary.total_objects_successful | numeric | | |
 
 Create the csv in the vault from the artifacts of container
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **True**
 
 #### Action Parameters
