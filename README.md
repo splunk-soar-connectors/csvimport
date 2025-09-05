@@ -1,7 +1,7 @@
 # CSV Import
 
 Publisher: Splunk <br>
-Connector Version: 1.1.1 <br>
+Connector Version: 1.1.2 <br>
 Product Vendor: Splunk <br>
 Product Name: CSV Import <br>
 Minimum Product Version: 6.1.0
