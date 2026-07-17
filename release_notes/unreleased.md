@@ -1,3 +1,3 @@
 **Unreleased**
 
-- Escape spreadsheet formula prefixes in CSV headers and artifact values.
+* - Escape spreadsheet formula prefixes in CSV headers and artifact values.
