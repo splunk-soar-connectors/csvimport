@@ -30,20 +30,7 @@ from phantom.vault import Vault
 from phantom_common import paths
 
 from csvimport_consts import *
-
-
-CSV_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
-
-
-def _escape_csv_formula(value):
-    if not isinstance(value, str):
-        return value
-
-    stripped_value = value.lstrip()
-    if value.startswith(("\t", "\r")) or stripped_value.startswith(CSV_FORMULA_PREFIXES):
-        return f"'{value}"
-
-    return value
+from csvimport_utils import escape_csv_formula
 
 
 class RetVal(tuple):
@@ -211,9 +198,9 @@ class CsvImportConnector(BaseConnector):
         fieldnames = sorted(fieldnames)
         with open(file_loc, "w") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow([_escape_csv_formula(fieldname) for fieldname in fieldnames])
+            writer.writerow([escape_csv_formula(fieldname) for fieldname in fieldnames])
             for row in response["data"]:
-                writer.writerow([_escape_csv_formula(row.get(fieldname)) for fieldname in fieldnames])
+                writer.writerow([escape_csv_formula(row.get(fieldname)) for fieldname in fieldnames])
         vault_ret_dict = phantomrules.vault_add(container=container_id, file_location=file_loc, file_name=filename)
         if vault_ret_dict[0]:
             vault_details = {phantom.APP_JSON_VAULT_ID: vault_ret_dict[2], "file_name": filename}
