@@ -1,5 +1,5 @@
 # File: csvimport_connector.py
-# Copyright (c) 2022-2025 Splunk Inc.
+# Copyright (c) 2022-2026 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ from phantom.vault import Vault
 from phantom_common import paths
 
 from csvimport_consts import *
+from csvimport_utils import escape_csv_formula
 
 
 class RetVal(tuple):
@@ -194,11 +195,12 @@ class CsvImportConnector(BaseConnector):
 
         file_loc = vault_tmp_dir + "/" + filename
 
+        fieldnames = sorted(fieldnames)
         with open(file_loc, "w") as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=list(fieldnames))
-            writer.writeheader()
+            writer = csv.writer(csvfile)
+            writer.writerow([escape_csv_formula(fieldname) for fieldname in fieldnames])
             for row in response["data"]:
-                writer.writerow(row)
+                writer.writerow([escape_csv_formula(row.get(fieldname)) for fieldname in fieldnames])
         vault_ret_dict = phantomrules.vault_add(container=container_id, file_location=file_loc, file_name=filename)
         if vault_ret_dict[0]:
             vault_details = {phantom.APP_JSON_VAULT_ID: vault_ret_dict[2], "file_name": filename}
